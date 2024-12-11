@@ -8,7 +8,7 @@ The main goals of this implementation are to show how to:
 - build ZIO-based microservice, including metrics and scheduled tasks,
 - integrate **Doobie** with ZIO,
 - use testcontainers to test repositories
-  - examples for both sequential and parallel test executions using single testcontainer
+  - examples for both sequential and parallel test executions using single testcontainer.
 
 ### TODO
 

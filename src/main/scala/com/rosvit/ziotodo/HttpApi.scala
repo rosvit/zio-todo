@@ -7,8 +7,6 @@ import zio.http.codec.PathCodec
 import zio.schema.Schema
 import zio.schema.codec.JsonCodec.schemaBasedBinaryCodec
 
-import java.util.UUID
-
 object HttpApi {
 
   private inline val PrefixTodo = "todo"
@@ -25,9 +23,9 @@ object HttpApi {
           .findAll()
           .map(todos => Response(body = Body.from(todos)))
       },
-      Method.GET / PrefixTodo / uuid("todoId") -> handler { (todoId: UUID, _: Request) =>
+      Method.GET / PrefixTodo / todoId -> handler { (todoId: TodoId, _: Request) =>
         TodoRepository
-          .findById(TodoId(todoId))
+          .findById(todoId)
           .map(_.fold(Response.notFound)(todo => Response(body = Body.from(todo))))
       },
       Method.POST / PrefixTodo -> handler { (req: Request) =>
