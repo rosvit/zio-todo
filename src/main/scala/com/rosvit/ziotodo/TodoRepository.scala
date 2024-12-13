@@ -15,6 +15,7 @@ trait TodoRepository {
   def findAll(): Task[List[Todo]]
   def create(description: String): Task[Todo]
   def complete(id: TodoId, completed: Boolean): Task[Boolean]
+  def delete(id: TodoId): Task[Unit]
   def deleteCompleted(completedBefore: Instant, lockId: Int): Task[Option[Int]]
 }
 
@@ -30,6 +31,9 @@ object TodoRepository {
 
   def complete(id: TodoId, completed: Boolean): RIO[TodoRepository, Boolean] =
     ZIO.serviceWithZIO[TodoRepository](_.complete(id, completed))
+
+  def delete(id: TodoId): RIO[TodoRepository, Unit] =
+    ZIO.serviceWithZIO[TodoRepository](_.delete(id))
 
   def deleteCompleted(completedBefore: Instant, lockId: Int): RIO[TodoRepository, Option[Int]] =
     ZIO.serviceWithZIO[TodoRepository](_.deleteCompleted(completedBefore, lockId))
@@ -64,6 +68,9 @@ class DoobieTodoRepository(xa: Transactor[Task]) extends TodoRepository {
       .transact(xa)
       .map(_ > 0)
   }
+
+  override def delete(id: TodoId): Task[Unit] =
+    sql"DELETE FROM todo WHERE id = $id".update.run.transact(xa).unit
 
   override def deleteCompleted(completedBefore: Instant, lockId: Int): Task[Option[Int]] = (for {
     lock <- sql"SELECT pg_try_advisory_xact_lock($lockId);".query[Boolean].unique

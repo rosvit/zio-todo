@@ -11,10 +11,11 @@ object Dependencies {
   val zioInteropCatsVersion = "23.1.0.3"
   val doobieVersion = "1.0.0-RC6"
   val micrometerVersion = "1.14.2"
-  val flywayVersion = "11.0.1"
+  val flywayVersion = "11.1.0"
   val logbackVersion = "1.5.12"
   val zioTestcontainersVersion = "0.6.0"
   val testcontainersPgVersion = "0.41.4"
+  val scala3MockVersion = "0.6.6"
 
   lazy val zio = "dev.zio" %% "zio" % zioVersion
   lazy val zioHttp = "dev.zio" %% "zio-http" % zioHttpVersion
@@ -26,12 +27,6 @@ object Dependencies {
   lazy val zioConfigMagnolia = "dev.zio" %% "zio-config-magnolia" % zioConfigVersion
   lazy val zioMetricsMicrometer = "dev.zio" %% "zio-metrics-connectors-micrometer" % zioMetricsVersion
 
-  lazy val zioTest = "dev.zio" %% "zio-test" % zioVersion % Test
-  lazy val zioTestSbt = "dev.zio" %% "zio-test-sbt" % zioVersion % Test
-  lazy val zioTestMagnolia = "dev.zio" %% "zio-test-magnolia" % zioVersion % Test
-  lazy val zioTestcontainers = "com.github.sideeffffect" %% "zio-testcontainers" % zioTestcontainersVersion % Test
-  lazy val testcontainersPg = "com.dimafeng" %% "testcontainers-scala-postgresql" % testcontainersPgVersion % Test
-
   lazy val zioDeps: Seq[ModuleID] = Seq(
     zio,
     zioHttp,
@@ -41,12 +36,7 @@ object Dependencies {
     zioInteropCats,
     zioConfigTypesafe,
     zioConfigMagnolia,
-    zioMetricsMicrometer,
-    zioTest,
-    zioTestSbt,
-    zioTestMagnolia,
-    zioTestcontainers,
-    testcontainersPg
+    zioMetricsMicrometer
   )
 
   lazy val doobieCore = "org.tpolecat" %% "doobie-core" % doobieVersion
@@ -57,4 +47,22 @@ object Dependencies {
   lazy val micrometerRegistryPrometheus = "io.micrometer" % "micrometer-registry-prometheus" % micrometerVersion
   lazy val flywayPostgresql = "org.flywaydb" % "flyway-database-postgresql" % flywayVersion
   lazy val logbackClassic = "ch.qos.logback" % "logback-classic" % logbackVersion
+
+  lazy val zioTest = "dev.zio" %% "zio-test" % zioVersion % Test
+  lazy val zioTestSbt = "dev.zio" %% "zio-test-sbt" % zioVersion % Test
+  lazy val zioTestMagnolia = "dev.zio" %% "zio-test-magnolia" % zioVersion % Test
+  lazy val zioHttpTestkit = "dev.zio" %% "zio-http-testkit" % zioHttpVersion % Test
+  lazy val zioTestcontainers = "com.github.sideeffffect" %% "zio-testcontainers" % zioTestcontainersVersion % Test
+  lazy val testcontainersPg = "com.dimafeng" %% "testcontainers-scala-postgresql" % testcontainersPgVersion % Test
+  lazy val scala3Mock = "eu.monniot" %% "scala3mock-cats" % scala3MockVersion % Test
+
+  lazy val testDeps: Seq[ModuleID] = Seq(
+    zioTest,
+    zioTestSbt,
+    zioTestMagnolia,
+    zioHttpTestkit,
+    zioTestcontainers,
+    testcontainersPg,
+    scala3Mock
+  )
 }

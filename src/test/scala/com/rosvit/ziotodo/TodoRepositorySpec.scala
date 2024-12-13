@@ -38,6 +38,14 @@ object TodoRepositorySpec extends ZIOSpecDefault with PostgresSupport {
       } yield assertTrue(completed.is(_.some).completed) &&
         assertTrue(completed.is(_.some).completedAt.is(_.some.anything))
     },
+    test("delete") {
+      for {
+        todo <- TodoRepository.create("toBeDeleted")
+        beforeDelete <- TodoRepository.findById(todo.id)
+        _ <- TodoRepository.delete(todo.id)
+        afterDelete <- TodoRepository.findById(todo.id)
+      } yield assert(beforeDelete)(isSome) && assert(afterDelete)(isNone)
+    },
     test("deleteCompleted") {
       for {
         oldTodo <- TodoRepository.create("old")

@@ -13,5 +13,5 @@ lazy val root = (project in file("."))
       micrometerRegistryPrometheus,
       flywayPostgresql,
       logbackClassic
-    )
+    ) ++ testDeps
   )
