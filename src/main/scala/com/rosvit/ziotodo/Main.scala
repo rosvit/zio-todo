@@ -1,6 +1,7 @@
 package com.rosvit.ziotodo
 
 import com.rosvit.ziotodo.config.database
+import com.rosvit.ziotodo.grpc.GrpcServer
 import io.micrometer.prometheusmetrics.{PrometheusConfig, PrometheusMeterRegistry}
 import zio.*
 import zio.config.typesafe.TypesafeConfigProvider
@@ -22,9 +23,11 @@ object Main extends ZIOAppDefault {
     (for {
       _ <- database.migrateFlyway
       _ <- CleanupTask.start().fork
+      _ <- GrpcServer.logServerPort
       _ <- Server.serve(HttpApi())
     } yield ())
       .provide(
+        GrpcServer.live,
         Server.default,
         CleanupTask.live,
         DoobieTodoRepository.live,

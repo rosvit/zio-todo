@@ -10,9 +10,8 @@ import zio.schema.codec.JsonCodec.schemaBasedBinaryCodec
 import zio.test.*
 import zio.test.Assertion.*
 
-import java.util.UUID
-
 object HttpApiSpec extends ZIOSpecDefault {
+  import TestUtils.*
 
   inline val Prefix = "todo"
 
@@ -111,7 +110,7 @@ object HttpApiSpec extends ZIOSpecDefault {
     }
   }
 
-  override def spec: Spec[TestEnvironment with Scope, Any] = suite("HttpApi")(
+  override def spec: Spec[TestEnvironment with Scope, Any] = suite("HttpApiSpec")(
     findAll,
     findById,
     findByIdNotFound,
@@ -132,8 +131,4 @@ object HttpApiSpec extends ZIOSpecDefault {
     _ <- TestServer.addRoutes(HttpApi.apiRoutes)
     resp <- client.batched(requestFn(port))
   } yield resp
-
-  private def newTodoId(): TodoId = TodoId(UUID.randomUUID())
-
-  private def newTodo(description: String): Todo = Todo(newTodoId(), description, false, None)
 }

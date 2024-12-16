@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.rosvit.ziotodo";
+
+option (scalapb.options) = {
+  import: "com.rosvit.ziotodo.grpc.mapping.given"
+};
+
+package ziotodo;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+import "scalapb/scalapb.proto";
+
+service TodoService {
+  rpc GetAll (google.protobuf.Empty) returns (TodoList) {}
+  rpc GetById (IdRequest) returns (Todo) {}
+  rpc Create (CreateRequest) returns (Todo) {}
+  rpc UpdateCompleted (UpdateRequest) returns (google.protobuf.Empty) {}
+  rpc Delete (IdRequest) returns (google.protobuf.Empty) {}
+}
+
+message TodoList {
+  repeated Todo todos = 1;
+}
+
+message IdRequest {
+  string id = 1 [(scalapb.field).type = "com.rosvit.ziotodo.TodoId"];
+}
+
+message CreateRequest {
+  string description = 1;
+}
+
+message UpdateRequest {
+  string id = 1 [(scalapb.field).type = "com.rosvit.ziotodo.TodoId"];
+  bool completed = 2;
+}
+
+message Todo {
+  string id = 1 [(scalapb.field).type = "com.rosvit.ziotodo.TodoId"];
+  string description = 2;
+  bool completed = 3;
+  optional google.protobuf.Timestamp completed_at = 4 [(scalapb.field).type = "java.time.Instant"];
+}

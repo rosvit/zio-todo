@@ -16,8 +16,7 @@ object database {
 
   private lazy val mkDatasource: RIO[MeterRegistry, HikariDataSource] = for {
     registry <- ZIO.service[MeterRegistry]
-    appCfg <- ZIO.config[AppConfig]
-    dbConfig = appCfg.db
+    dbConfig <- ZIO.config[DbConfig]
     hikariCfg <- DoobieHikariConfig.makeHikariConfig[Task](
       DoobieHikariConfig(
         jdbcUrl = dbConfig.url,
@@ -41,12 +40,12 @@ object database {
   lazy val transactor: RLayer[HikariDataSource, Transactor[Task]] = ZLayer {
     for {
       ds <- ZIO.service[HikariDataSource]
-      appCfg <- ZIO.config[AppConfig]
+      cfg <- ZIO.config[DbConfig]
     } yield HikariTransactor[Task](
       hikariDataSource = ds,
       connectEC = ExecutionContext.fromExecutorService(
         // same size as HikariCP maximumPoolSize, see https://typelevel.org/doobie/docs/14-Managing-Connections.html
-        Executors.newFixedThreadPool(appCfg.db.maxPoolSize.getOrElse(DbConfig.DefaultMaxPoolSize))
+        Executors.newFixedThreadPool(cfg.maxPoolSize.getOrElse(DbConfig.DefaultMaxPoolSize))
       )
     )
   }

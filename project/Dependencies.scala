@@ -13,6 +13,9 @@ object Dependencies {
   val micrometerVersion = "1.14.2"
   val flywayVersion = "11.1.0"
   val logbackVersion = "1.5.12"
+  val grpcVersion = "1.69.0"
+  val googleProtosVersion = "2.9.6-0"
+
   val zioTestcontainersVersion = "0.6.0"
   val testcontainersPgVersion = "0.41.4"
   val scala3MockVersion = "0.6.6"
@@ -47,6 +50,20 @@ object Dependencies {
   lazy val micrometerRegistryPrometheus = "io.micrometer" % "micrometer-registry-prometheus" % micrometerVersion
   lazy val flywayPostgresql = "org.flywaydb" % "flyway-database-postgresql" % flywayVersion
   lazy val logbackClassic = "ch.qos.logback" % "logback-classic" % logbackVersion
+
+  lazy val grpcNetty = "io.grpc" % "grpc-netty" % grpcVersion
+  lazy val scalapbRuntimeGrpc =
+    "com.thesamet.scalapb" %% "scalapb-runtime-grpc" % scalapb.compiler.Version.scalapbVersion
+  lazy val googleProtos =
+    "com.thesamet.scalapb.common-protos" %% "proto-google-common-protos-scalapb_0.11" % googleProtosVersion
+  lazy val googleProtosPb =
+    "com.thesamet.scalapb.common-protos" %% "proto-google-common-protos-scalapb_0.11" % googleProtosVersion % "protobuf"
+  lazy val scalaPbProto =
+    "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf"
+  lazy val grpcInprocess = "io.grpc" % "grpc-inprocess" % grpcVersion % Test
+
+  lazy val grpcDeps: Seq[ModuleID] =
+    Seq(grpcNetty, scalapbRuntimeGrpc, googleProtos, googleProtosPb, scalaPbProto, grpcInprocess)
 
   lazy val zioTest = "dev.zio" %% "zio-test" % zioVersion % Test
   lazy val zioTestSbt = "dev.zio" %% "zio-test-sbt" % zioVersion % Test
