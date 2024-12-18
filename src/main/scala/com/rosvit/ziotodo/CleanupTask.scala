@@ -5,15 +5,16 @@ import zio.*
 
 class CleanupTask(repository: TodoRepository, config: CleanupConfig) {
 
-  def start(): Task[Unit] = for {
+  def start(): Task[Unit] = (for {
     before <- Clock.instant.map(_.minusMillis(config.deleteAfter.toMillis))
     _ <- repository
       .deleteCompleted(before, config.lockId)
       .tap(_.fold(ZIO.unit)(count => ZIO.logInfo(s"DB clean-up finished, $count items removed...")))
       .tapErrorCause(c => ZIO.logErrorCause(c))
       .unit
-      .repeat(Schedule.fixed(config.repeatAfter))
-  } yield ()
+  } yield ())
+    .orElse(ZIO.unit)
+    .repeat(Schedule.fixed(config.repeatAfter).unit)
 }
 
 object CleanupTask {

@@ -12,7 +12,7 @@ object Dependencies {
   val doobieVersion = "1.0.0-RC6"
   val micrometerVersion = "1.14.2"
   val flywayVersion = "11.1.0"
-  val logbackVersion = "1.5.12"
+  val logbackVersion = "1.5.13"
   val grpcVersion = "1.69.0"
   val googleProtosVersion = "2.9.6-0"
 
