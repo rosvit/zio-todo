@@ -2,16 +2,16 @@ import sbt.*
 
 object Dependencies {
 
-  val zioVersion = "2.1.14"
+  val zioVersion = "2.1.15"
   val zioHttpVersion = "3.0.1"
-  val zioJsonVersion = "0.7.5"
+  val zioJsonVersion = "0.7.17"
   val zioConfigVersion = "4.0.3"
   val zioLoggingVersion = "2.4.0"
   val zioMetricsVersion = "2.3.1"
   val zioInteropCatsVersion = "23.1.0.3"
-  val doobieVersion = "1.0.0-RC6"
-  val micrometerVersion = "1.14.3"
-  val flywayVersion = "11.2.0"
+  val doobieVersion = "1.0.0-RC7"
+  val micrometerVersion = "1.14.4"
+  val flywayVersion = "11.3.1"
   val logbackVersion = "1.5.16"
   val grpcVersion = "1.70.0"
   val googleProtosVersion = "2.9.6-0"

@@ -1,7 +1,7 @@
 import Dependencies.*
 import org.typelevel.scalacoptions.ScalacOptions
 
-ThisBuild / scalaVersion := "3.3.4"
+ThisBuild / scalaVersion := "3.3.5"
 ThisBuild / version := "0.1.0-SNAPSHOT"
 
 lazy val root = (project in file("."))
