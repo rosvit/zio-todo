@@ -11,7 +11,7 @@ import zio.*
 import zio.test.*
 import zio.test.Assertion.*
 import com.rosvit.ziotodo.grpc.extensions.asDomain
-import org.scalamock.stubs.ZIOStubs
+import org.scalamock.stubs.{Stub, ZIOStubs}
 
 import java.util.UUID
 
@@ -20,9 +20,9 @@ object TodoServiceSpec extends ZIOSpecDefault, ZIOStubs {
 
   private val getAll = test("list all TODO items") {
     val expected = List(newTodo("t1"), newTodo("t2"), newTodo("t3"))
-    val repo = stub[TodoRepository]
-    provideAllLayers(repo) {
+    withAllLayers {
       for {
+        repo <- ZIO.service[Stub[TodoRepository]]
         _ <- repo.findAll().returnsZIOWith(ZIO.succeed(expected))
         client <- ZIO.service[TodoServiceClient]
         resp <- client.getAll(Empty())
@@ -33,9 +33,9 @@ object TodoServiceSpec extends ZIOSpecDefault, ZIOStubs {
 
   private val getById = test("get TODO by id") {
     val todo = newTodo("test")
-    val repo = stub[TodoRepository]
-    provideAllLayers(repo) {
+    withAllLayers {
       for {
+        repo <- ZIO.service[Stub[TodoRepository]]
         _ <- repo.findById.returnsZIOWith(ZIO.some(todo))
         client <- ZIO.service[TodoServiceClient]
         resp <- client.getById(IdRequest(todo.id))
@@ -45,9 +45,9 @@ object TodoServiceSpec extends ZIOSpecDefault, ZIOStubs {
 
   private val getByIdNotFound = test("get TODO by id - not found") {
     val id = newTodoId()
-    val repo = stub[TodoRepository]
-    provideAllLayers(repo) {
+    withAllLayers {
       for {
+        repo <- ZIO.service[Stub[TodoRepository]]
         _ <- repo.findById.returnsZIOWith(ZIO.none)
         client <- ZIO.service[TodoServiceClient]
         resp <- client.getById(IdRequest(id)).mapError(_.getStatus).exit
@@ -57,9 +57,9 @@ object TodoServiceSpec extends ZIOSpecDefault, ZIOStubs {
 
   private val create = test("create new TODO") {
     val expectedTodo = newTodo("create")
-    val repo = stub[TodoRepository]
-    provideAllLayers(repo) {
+    withAllLayers {
       for {
+        repo <- ZIO.service[Stub[TodoRepository]]
         _ <- repo.create.returnsZIOWith(ZIO.succeed(expectedTodo))
         client <- ZIO.service[TodoServiceClient]
         resp <- client.create(CreateRequest(expectedTodo.description))
@@ -69,9 +69,9 @@ object TodoServiceSpec extends ZIOSpecDefault, ZIOStubs {
 
   private val update = test("update completed flag") {
     val id = newTodoId()
-    val repo = stub[TodoRepository]
-    provideAllLayers(repo) {
+    withAllLayers {
       for {
+        repo <- ZIO.service[Stub[TodoRepository]]
         _ <- repo.complete.returnsZIOWith(ZIO.succeed(true))
         client <- ZIO.service[TodoServiceClient]
         resp <- client.updateCompleted(UpdateRequest(id, true))
@@ -81,9 +81,9 @@ object TodoServiceSpec extends ZIOSpecDefault, ZIOStubs {
 
   private val delete = test("delete TODO by id") {
     val id = newTodoId()
-    val repo = stub[TodoRepository]
-    provideAllLayers(repo) {
+    withAllLayers {
       for {
+        repo <- ZIO.service[Stub[TodoRepository]]
         _ <- repo.delete.returnsZIOWith(ZIO.unit)
         client <- ZIO.service[TodoServiceClient]
         resp <- client.delete(IdRequest(id))
@@ -100,9 +100,10 @@ object TodoServiceSpec extends ZIOSpecDefault, ZIOStubs {
     delete
   )
 
-  def provideAllLayers(repo: TodoRepository): TaskLayer[TodoServiceClient] = {
+  def withAllLayers: TaskLayer[Stub[TodoRepository] & TodoServiceClient] = {
     val processName = UUID.randomUUID().toString
-    ZLayer.succeed(repo) >>> TodoService.live >>> grpcServer(processName) >>> grpcClient(processName)
+    val repo = stub[TodoRepository]
+    ZLayer.succeed(repo) >+> (TodoService.live >>> grpcServer(processName) >>> grpcClient(processName))
   }
 
   def grpcServer(name: String): RLayer[TodoService, Server] =

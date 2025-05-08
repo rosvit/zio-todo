@@ -1,6 +1,6 @@
 package com.rosvit.ziotodo
 
-import org.scalamock.stubs.ZIOStubs
+import org.scalamock.stubs.{Stub, ZIOStubs}
 import zio.*
 import zio.http.*
 import zio.http.netty.NettyConfig
@@ -16,8 +16,7 @@ object HttpApiSpec extends ZIOSpecDefault, ZIOStubs {
 
   private val findAll = test("list all TODO items") {
     val expected = List(newTodo("t1"), newTodo("t2"), newTodo("t3"))
-    val repo = stub[TodoRepository]
-    withRepository(repo) {
+    withRepository { repo =>
       for {
         _ <- repo.findAll().returnsZIOWith(ZIO.succeed(expected))
         resp <- doRequest(port => Request.get(URL.root.port(port) / Prefix))
@@ -28,8 +27,7 @@ object HttpApiSpec extends ZIOSpecDefault, ZIOStubs {
 
   private val findById = test("get TODO by id") {
     val todo = newTodo("test")
-    val repo = stub[TodoRepository]
-    withRepository(repo) {
+    withRepository { repo =>
       for {
         _ <- repo.findById.returnsZIO {
           case todo.id => ZIO.some(todo)
@@ -43,8 +41,7 @@ object HttpApiSpec extends ZIOSpecDefault, ZIOStubs {
 
   private val findByIdNotFound = test("get TODO by id - not found") {
     val id = newTodoId()
-    val repo = stub[TodoRepository]
-    withRepository(repo) {
+    withRepository { repo =>
       for {
         _ <- repo.findById.returnsZIOWith(ZIO.none)
         resp <- doRequest(port => Request.get(URL.root.port(port) / Prefix / id.toString))
@@ -54,8 +51,7 @@ object HttpApiSpec extends ZIOSpecDefault, ZIOStubs {
 
   private val create = test("create new TODO") {
     val expectedTodo = newTodo("create")
-    val repo = stub[TodoRepository]
-    withRepository(repo) {
+    withRepository { repo =>
       for {
         _ <- repo.create.returnsZIOWith(ZIO.succeed(expectedTodo))
         resp <- doRequest(port => Request.post(URL.root.port(port) / Prefix, Body.from(CreateTodo("create"))))
@@ -68,8 +64,7 @@ object HttpApiSpec extends ZIOSpecDefault, ZIOStubs {
 
   private val update = test("update completed flag") {
     val id = newTodoId()
-    val repo = stub[TodoRepository]
-    withRepository(repo) {
+    withRepository { repo =>
       for {
         _ <- repo.complete.returnsZIOWith(ZIO.succeed(true))
         resp <- doRequest(port => Request.patch(URL.root.port(port) / Prefix / id.toString / "true", Body.empty))
@@ -79,8 +74,7 @@ object HttpApiSpec extends ZIOSpecDefault, ZIOStubs {
 
   private val delete = test("delete TODO by id") {
     val id = newTodoId()
-    val repo = stub[TodoRepository]
-    withRepository(repo) {
+    withRepository { repo =>
       for {
         _ <- repo.delete.returnsZIOWith(ZIO.unit)
         resp <- doRequest(port => Request.delete(URL.root.port(port) / Prefix / id.toString))
@@ -103,7 +97,10 @@ object HttpApiSpec extends ZIOSpecDefault, ZIOStubs {
     ZLayer.succeed(NettyConfig.defaultWithFastShutdown)
   )
 
-  private def withRepository(repo: TodoRepository): ULayer[TodoRepository] = ZLayer.succeed(repo)
+  private def withRepository(f: Stub[TodoRepository] => RIO[Client & TestServer & TodoRepository, TestResult]) = {
+    val repo = stub[TodoRepository]
+    f(repo).provideSomeLayer(ZLayer.succeed(repo))
+  }
 
   private def doRequest(requestFn: Int => Request) = for {
     client <- ZIO.service[Client]
