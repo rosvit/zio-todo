@@ -18,6 +18,7 @@ trait PostgresSupport {
 
   def createDatabase(pg: PostgreSQLContainer): Task[String] = for {
     dbName <- ZIO.succeed(UUID.randomUUID().toString)
+    _ <- ZIO.attempt(Class.forName("org.postgresql.Driver"))
     jdbcUrl = s"jdbc:postgresql://${pg.container.getHost}:${pg.container.getMappedPort(POSTGRESQL_PORT)}"
     _ <- createDatabase(s"$jdbcUrl/", pg.username, pg.password, dbName)
   } yield s"$jdbcUrl/$dbName"

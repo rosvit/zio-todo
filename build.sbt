@@ -12,7 +12,10 @@ lazy val root = (project in file("."))
       scalapb.zio_grpc.ZioCodeGenerator -> (Compile / sourceManaged).value
     ),
     Compile / scalacOptions += "-Wconf:src=target/scala[^/]*/src_managed/.*:silent", // silence warnings in generated code
+    // TODO: remove following exclusion when https://github.com/zio/zio/issues/9690 is resolved for LTS Scala 3.3.x
+    Compile / tpolecatExcludeOptions += ScalacOptions.warnUnusedLocals,
     Test / tpolecatExcludeOptions += ScalacOptions.warnNonUnitStatement,
+    Test / run / fork := true,
     scalacOptions ++= Seq("-no-indent", "-rewrite"),
     libraryDependencies ++= zioDeps ++ doobieDeps ++ grpcDeps ++ Seq(
       micrometerRegistryPrometheus,

@@ -37,6 +37,6 @@ object Main extends ZIOAppDefault {
         ZLayer.succeed(new PrometheusMeterRegistry(PrometheusConfig.DEFAULT)),
         ZLayer.succeed(MicrometerConfig.default),
         Runtime.enableRuntimeMetrics,
-        DefaultJvmMetrics.live.unit
+        DefaultJvmMetrics.liveV2.unit
       )
 }

@@ -2,22 +2,22 @@ import sbt.*
 
 object Dependencies {
 
-  val zioVersion = "2.1.15"
-  val zioHttpVersion = "3.0.1"
-  val zioJsonVersion = "0.7.17"
-  val zioConfigVersion = "4.0.3"
-  val zioLoggingVersion = "2.4.0"
+  val zioVersion = "2.1.17"
+  val zioHttpVersion = "3.2.0"
+  val zioJsonVersion = "0.7.42"
+  val zioConfigVersion = "4.0.4"
+  val zioLoggingVersion = "2.5.0"
   val zioMetricsVersion = "2.3.1"
-  val zioInteropCatsVersion = "23.1.0.3"
-  val doobieVersion = "1.0.0-RC7"
-  val micrometerVersion = "1.14.4"
-  val flywayVersion = "11.3.1"
-  val logbackVersion = "1.5.16"
-  val grpcVersion = "1.70.0"
+  val zioInteropCatsVersion = "23.1.0.5"
+  val doobieVersion = "1.0.0-RC9"
+  val micrometerVersion = "1.14.6"
+  val flywayVersion = "11.8.0"
+  val logbackVersion = "1.5.18"
+  val grpcVersion = "1.72.0"
   val googleProtosVersion = "2.9.6-0"
 
   val zioTestcontainersVersion = "0.6.0"
-  val testcontainersPgVersion = "0.41.8"
+  val testcontainersPgVersion = "0.43.0"
   val scala3MockVersion = "0.6.6"
 
   lazy val zio = "dev.zio" %% "zio" % zioVersion
