@@ -4,105 +4,90 @@ import com.google.protobuf.empty.Empty
 import com.rosvit.ziotodo.grpc_api.ZioGrpcApi.TodoServiceClient
 import com.rosvit.ziotodo.grpc_api.{CreateRequest, IdRequest, UpdateRequest, ZioGrpcApi}
 import com.rosvit.ziotodo.{Todo, TodoId, TodoRepository}
-import eu.monniot.scala3mock.cats.ScalaMocks.*
 import io.grpc.Status
 import io.grpc.inprocess.{InProcessChannelBuilder, InProcessServerBuilder}
 import scalapb.zio_grpc.{Server, ServerLayer, ZManagedChannel}
 import zio.*
-import zio.interop.catz.*
 import zio.test.*
 import zio.test.Assertion.*
 import com.rosvit.ziotodo.grpc.extensions.asDomain
+import org.scalamock.stubs.ZIOStubs
 
 import java.util.UUID
 
-object TodoServiceSpec extends ZIOSpecDefault {
+object TodoServiceSpec extends ZIOSpecDefault, ZIOStubs {
   import com.rosvit.ziotodo.TestUtils.*
 
   private val getAll = test("list all TODO items") {
-    withExpectations() {
-      val expected = List(newTodo("t1"), newTodo("t2"), newTodo("t3"))
-      val repo = mock[TodoRepository]
-      when(repo.findAll _)
-        .expects()
-        .returning(ZIO.succeed(expected))
-      provideAllLayers(repo) {
-        for {
-          client <- ZIO.service[TodoServiceClient]
-          resp <- client.getAll(Empty())
-          items = resp.todos.map(_.asDomain)
-        } yield assert(items)(hasSameElements(expected))
-      }
+    val expected = List(newTodo("t1"), newTodo("t2"), newTodo("t3"))
+    val repo = stub[TodoRepository]
+    provideAllLayers(repo) {
+      for {
+        _ <- repo.findAll().returnsZIOWith(ZIO.succeed(expected))
+        client <- ZIO.service[TodoServiceClient]
+        resp <- client.getAll(Empty())
+        items = resp.todos.map(_.asDomain)
+      } yield assert(items)(hasSameElements(expected)) && verifyOnce(repo.findAll())
     }
   }
 
   private val getById = test("get TODO by id") {
-    withExpectations() {
-      val todo = newTodo("test")
-      val repo = mock[TodoRepository]
-      when(repo.findById).expects(todo.id).returning(ZIO.succeed(Some(todo)))
-      provideAllLayers(repo) {
-        for {
-          client <- ZIO.service[TodoServiceClient]
-          resp <- client.getById(IdRequest(todo.id))
-        } yield assert(resp.id)(equalTo(todo.id))
-      }
+    val todo = newTodo("test")
+    val repo = stub[TodoRepository]
+    provideAllLayers(repo) {
+      for {
+        _ <- repo.findById.returnsZIOWith(ZIO.some(todo))
+        client <- ZIO.service[TodoServiceClient]
+        resp <- client.getById(IdRequest(todo.id))
+      } yield assert(resp.id)(equalTo(todo.id)) && verifyOnceWithArgs(repo.findById, todo.id)
     }
   }
 
   private val getByIdNotFound = test("get TODO by id - not found") {
-    withExpectations() {
-      val id = newTodoId()
-      val repo = mock[TodoRepository]
-      when(repo.findById).expects(id).returning(ZIO.succeed(None))
-      provideAllLayers(repo) {
-        for {
-          client <- ZIO.service[TodoServiceClient]
-          resp <- client.getById(IdRequest(id)).mapError(_.getStatus).exit
-        } yield assert(resp)(fails(equalTo(Status.NOT_FOUND)))
-      }
+    val id = newTodoId()
+    val repo = stub[TodoRepository]
+    provideAllLayers(repo) {
+      for {
+        _ <- repo.findById.returnsZIOWith(ZIO.none)
+        client <- ZIO.service[TodoServiceClient]
+        resp <- client.getById(IdRequest(id)).mapError(_.getStatus).exit
+      } yield assert(resp)(fails(equalTo(Status.NOT_FOUND))) && verifyOnceWithArgs(repo.findById, id)
     }
   }
 
   private val create = test("create new TODO") {
-    withExpectations() {
-      val expectedTodo = newTodo("create")
-      val repo = mock[TodoRepository]
-      when(repo.create).expects(expectedTodo.description).returning(ZIO.succeed(expectedTodo))
-      provideAllLayers(repo) {
-        for {
-          client <- ZIO.service[TodoServiceClient]
-          resp <- client.create(CreateRequest(expectedTodo.description))
-        } yield assert(resp.asDomain)(equalTo(expectedTodo))
-      }
+    val expectedTodo = newTodo("create")
+    val repo = stub[TodoRepository]
+    provideAllLayers(repo) {
+      for {
+        _ <- repo.create.returnsZIOWith(ZIO.succeed(expectedTodo))
+        client <- ZIO.service[TodoServiceClient]
+        resp <- client.create(CreateRequest(expectedTodo.description))
+      } yield assert(resp.asDomain)(equalTo(expectedTodo)) && verifyOnceWithArgs(repo.create, expectedTodo.description)
     }
   }
 
   private val update = test("update completed flag") {
-    withExpectations() {
-      val id = newTodoId()
-      val repo = mock[TodoRepository]
-      when(repo.complete).expects(id, true).returning(ZIO.succeed(true))
-      provideAllLayers(repo) {
-        for {
-          client <- ZIO.service[TodoServiceClient]
-          resp <- client.updateCompleted(UpdateRequest(id, true))
-        } yield assert(resp)(equalTo(Empty()))
-      }
+    val id = newTodoId()
+    val repo = stub[TodoRepository]
+    provideAllLayers(repo) {
+      for {
+        _ <- repo.complete.returnsZIOWith(ZIO.succeed(true))
+        client <- ZIO.service[TodoServiceClient]
+        resp <- client.updateCompleted(UpdateRequest(id, true))
+      } yield assert(resp)(equalTo(Empty())) && verifyOnceWithArgs(repo.complete, (id, true))
     }
   }
 
   private val delete = test("delete TODO by id") {
-    withExpectations() {
-      val id = newTodoId()
-      val repo = mock[TodoRepository]
-      when(repo.delete).expects(id).returning(ZIO.unit)
-      provideAllLayers(repo) {
-        for {
-          client <- ZIO.service[TodoServiceClient]
-          resp <- client.delete(IdRequest(id))
-        } yield assert(resp)(equalTo(Empty()))
-      }
+    val id = newTodoId()
+    val repo = stub[TodoRepository]
+    provideAllLayers(repo) {
+      for {
+        _ <- repo.delete.returnsZIOWith(ZIO.unit)
+        client <- ZIO.service[TodoServiceClient]
+        resp <- client.delete(IdRequest(id))
+      } yield assert(resp)(equalTo(Empty())) && verifyOnceWithArgs(repo.delete, id)
     }
   }
 

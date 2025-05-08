@@ -12,5 +12,4 @@ The main goals of this implementation are to show how to:
 - provide gRPC API using `zio-grpc` and ScalaPB,
 - use testcontainers to test repositories
     - examples for both sequential and parallel test executions using single testcontainer,
-- use [scala3mock Cats Effect 3 integration](https://francois.monniot.eu/scala3mock/docs/user-guide/cats) within
-  `zio-test`.
+- use new ScalaMock 7 `zio-test` integration.

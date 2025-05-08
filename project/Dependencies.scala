@@ -18,7 +18,7 @@ object Dependencies {
 
   val zioTestcontainersVersion = "0.6.0"
   val testcontainersPgVersion = "0.43.0"
-  val scala3MockVersion = "0.6.6"
+  val scalaMockVersion = "7.3.2"
 
   lazy val zio = "dev.zio" %% "zio" % zioVersion
   lazy val zioHttp = "dev.zio" %% "zio-http" % zioHttpVersion
@@ -70,8 +70,8 @@ object Dependencies {
   lazy val zioTestMagnolia = "dev.zio" %% "zio-test-magnolia" % zioVersion % Test
   lazy val zioHttpTestkit = "dev.zio" %% "zio-http-testkit" % zioHttpVersion % Test
   lazy val zioTestcontainers = "com.github.sideeffffect" %% "zio-testcontainers" % zioTestcontainersVersion % Test
+  lazy val scalaMockZio = "org.scalamock" %% "scalamock-zio" % scalaMockVersion % Test
   lazy val testcontainersPg = "com.dimafeng" %% "testcontainers-scala-postgresql" % testcontainersPgVersion % Test
-  lazy val scala3Mock = "eu.monniot" %% "scala3mock-cats" % scala3MockVersion % Test
 
   lazy val testDeps: Seq[ModuleID] = Seq(
     zioTest,
@@ -79,7 +79,7 @@ object Dependencies {
     zioTestMagnolia,
     zioHttpTestkit,
     zioTestcontainers,
-    testcontainersPg,
-    scala3Mock
+    scalaMockZio,
+    testcontainersPg
   )
 }
